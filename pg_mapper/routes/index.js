@@ -15,10 +15,10 @@ const conString =
 
 // Set up your database query to display GeoJSON
 const geojsonQuery =
-  "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json((id, name)) As properties FROM \"geom_tsn(Anna2020-2012)\" As lg) As f) As fc";
+  "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(lg.geom)::json As geometry, row_to_json((obj_name, obj_authors, obj_year, type_of_work, obj_assoc_inv_nums, path_cloud)) As properties FROM \"uds_meta_view_v2\" As lg) As f) As fc";
 
 const jsonQuery =
-  "SELECT array_to_json(array_agg(t)) FROM (select * from uds_main_copy) as t";
+  "SELECT array_to_json(array_agg(t)) FROM (select * from uds_meta) as t";
 
 /* GET home page. */
 router.get("/", function (req, res, next) {
