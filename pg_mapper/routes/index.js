@@ -1,10 +1,19 @@
 const express = require("express");
 const cors = require("cors"); // require Express
 const router = express.Router(); // setup usage of the Express router engine
-
 /* PostgreSQL and PostGIS module and connection setup */
 const { Client, Query } = require("pg");
-
+const { MongoClient } = require("mongodb");
+// or as an es module:
+// import { MongoClient } from 'mongodb'
+// Initialize connection once
+MongoClient.connect(
+  "mongodb://192.168.6.201:27017/admin",
+  function (err, database) {
+    if (err) return console.error(err);
+    db = database;
+  }
+);
 // Setup connection
 const username = "postgres"; // sandbox username
 const password = "postgres"; // read only privileges on our table
@@ -46,139 +55,147 @@ const jsonLibraryQuery =
   "SELECT array_to_json(array_agg(t)) FROM (select * from library) as t";
 
 /* GET home page. */
-router.get("/", function(req, res, next) {
+router.get("/", function (req, res, next) {
   res.render("index", { title: "Express" });
 });
 
 module.exports = router;
 
+router.get("/api/login", cors(), function (req, res, next) {
+  db.collection("users", function (err, collection) {
+    collection.find({}).toArray(function (err, data) {
+      res.json(data);
+    });
+  });
+});
+
 /* GET Postgres GeoJSON data */
-router.get("/api/geojson", cors(), function(req, res) {
+router.get("/api/geojson", cors(), function (req, res) {
   const client = new Client(conString);
   client.connect();
   const query = client.query(new Query(geojsonQuery));
-  query.on("row", function(row, result) {
+  query.on("row", function (row, result) {
     result.addRow(row);
   });
-  query.on("end", function(result) {
+  query.on("end", function (result) {
     res.send(result.rows[0].row_to_json);
     res.end();
   });
 });
 
-router.get("/api/aprgeojson", cors(), function(req, res) {
+router.get("/api/aprgeojson", cors(), function (req, res) {
   const client = new Client(conString);
   client.connect();
   const query = client.query(new Query(geojsonAprQuery));
-  query.on("row", function(row, result) {
+  query.on("row", function (row, result) {
     result.addRow(row);
   });
-  query.on("end", function(result) {
+  query.on("end", function (result) {
     res.send(result.rows[0].row_to_json);
     res.end();
   });
 });
 
-router.get("/api/layout1m", cors(), function(req, res) {
+router.get("/api/layout1m", cors(), function (req, res) {
   const client = new Client(conString);
   client.connect();
   const query = client.query(new Query(layout1MQuery));
-  query.on("row", function(row, result) {
+  query.on("row", function (row, result) {
     result.addRow(row);
   });
-  query.on("end", function(result) {
+  query.on("end", function (result) {
     res.send(result.rows[0].row_to_json);
     res.end();
   });
 });
 
-router.get("/api/layout200K", cors(), function(req, res) {
+router.get("/api/layout200K", cors(), function (req, res) {
   const client = new Client(conString);
   client.connect();
   const query = client.query(new Query(layout200KQuery));
-  query.on("row", function(row, result) {
+  query.on("row", function (row, result) {
     result.addRow(row);
   });
-  query.on("end", function(result) {
+  query.on("end", function (result) {
     res.send(result.rows[0].row_to_json);
     res.end();
   });
 });
 
-router.get("/api/layout100K", cors(), function(req, res) {
+router.get("/api/layout100K", cors(), function (req, res) {
   const client = new Client(conString);
   client.connect();
   const query = client.query(new Query(layout100KQuery));
-  query.on("row", function(row, result) {
+  query.on("row", function (row, result) {
     result.addRow(row);
   });
-  query.on("end", function(result) {
+  query.on("end", function (result) {
     res.send(result.rows[0].row_to_json);
     res.end();
   });
 });
 /* GET Postgres JSON data */
 
-router.get("/api/json", cors(), function(req, res) {
+router.get("/api/json", cors(), function (req, res) {
   const client = new Client(conString);
   client.connect();
   const query = client.query(new Query(jsonQuery));
-  query.on("row", function(row, result) {
+  query.on("row", function (row, result) {
     result.addRow(row);
   });
-  query.on("end", function(result) {
+  query.on("end", function (result) {
     res.send(result.rows[0].array_to_json);
     res.end();
   });
 });
 
-router.get("/api/apr", cors(), function(req, res) {
+router.get("/api/apr", cors(), function (req, res) {
   const client = new Client(conString);
   client.connect();
   const query = client.query(new Query(jsonAprQuery));
-  query.on("row", function(row, result) {
+  query.on("row", function (row, result) {
     result.addRow(row);
   });
-  query.on("end", function(result) {
+  query.on("end", function (result) {
     res.send(result.rows[0].array_to_json);
     res.end();
   });
 });
 
-router.get("/api/fund", cors(), function(req, res) {
+router.get("/api/fund", cors(), function (req, res) {
   const client = new Client(conString);
   client.connect();
   const query = client.query(new Query(jsonFundQuery));
-  query.on("row", function(row, result) {
+  query.on("row", function (row, result) {
     result.addRow(row);
   });
-  query.on("end", function(result) {
+  query.on("end", function (result) {
     res.send(result.rows[0].array_to_json);
     res.end();
   });
 });
 
-router.get("/api/library", cors(), function(req, res) {
+router.get("/api/library", cors(), function (req, res) {
   const client = new Client(conString);
   client.connect();
   const query = client.query(new Query(jsonLibraryQuery));
-  query.on("row", function(row, result) {
+  query.on("row", function (row, result) {
     result.addRow(row);
   });
-  query.on("end", function(result) {
+  query.on("end", function (result) {
     res.send(result.rows[0].array_to_json);
     res.end();
   });
 });
 
-router.get("/api/test_newest", cors(), function(req, res) {
+router.get("/api/test_newest", cors(), function (req, res) {
   const client = new Client(conString);
   client.connect();
   const query = client.query(new Query(test_newest));
-  query.on("row", function(row, result) {
+  query.on("row", function (row, result) {
     result.addRow(row);
   });
-  query.on("end", function(result) {
+  query.on("end", function (result) {
     res.send(result.rows[0].row_to_json);
     res.end();
   });
